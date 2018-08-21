@@ -1,5 +1,5 @@
 {
-    "name": "mesavolt/materialdesign-php",
+    "name": "mesavolt/mdi-php",
     "description": "Easy MDI integration for PHP 7.1+",
     "type": "library",
     "license": "MIT",
@@ -7,6 +7,10 @@
         {
             "name": "MesaVolt",
             "email": "contact@mesavolt.com"
+        },
+        {
+            "name": "Quentin",
+            "email": "stoeckel.quentin@gmail.com"
         }
     ],
     "autoload" : {

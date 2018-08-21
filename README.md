@@ -16,7 +16,7 @@ npm install @mdi/svg
 Add this package to your project:
 
 ```bash
-composer require mesavolt/materialdesign-php
+composer require mesavolt/mdi-php
 ```
 
 Globally configure the icons location. This should be done once and before
