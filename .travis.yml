@@ -1,0 +1,10 @@
+language: php
+php:
+  - '7.1'
+
+install: composer install
+script: vendor/bin/phpunit --coverage-clover coverage.xml
+
+after_script:
+  # upload coverage.xml file to Coveralls to analyze it
+  - travis_retry vendor/bin/php-coveralls --verbose

@@ -2,6 +2,11 @@
 
 Painlessly drive away from using the MaterialDesignIcons webfont!
 
+[![Latest Stable Version](https://poser.pugx.org/mesavolt/mdi-php/v/stable)](https://packagist.org/packages/mesavolt/mdi-php)
+[![Build Status](https://travis-ci.org/chteuchteu/MaterialDesignIcons-PHP.svg)](https://travis-ci.org/chteuchteu/MaterialDesignIcons-PHP)
+[![Coverage Status](https://coveralls.io/repos/github/chteuchteu/MaterialDesignIcons-PHP/badge.svg)](https://coveralls.io/github/chteuchteu/MaterialDesignIcons-PHP)
+[![License](https://poser.pugx.org/mesavolt/mdi-php/license)](https://packagist.org/packages/mesavolt/mdi-php)
+
 ## Usage
 
 Add `@mdi/svg` npm package to your project:
