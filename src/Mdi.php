@@ -35,8 +35,8 @@ abstract class Mdi
 
     public static function mdi(string $icon, ?string $class = null, int $size = 24, array $attrs = []): string
     {
-        // Ensure that the icons path has been specified
-        if (!self::$iconsPath) {
+        // Ensure that the icons path has been specified, or auto-detect it
+        if (!self::$iconsPath && !self::autoDetectIconsPath()) {
             throw new \RuntimeException('You forgot to specify MDI\'s path!');
         }
 
@@ -89,6 +89,29 @@ abstract class Mdi
             self::attributes($attributes),
             $svg
         );
+    }
+
+    /**
+     * Attempts to auto-detect $iconsPath.
+     * We assume that this file (Mdi.php) lives in /vendor/mesavolt/mdi-php/src/.
+     *
+     * @return bool True if we successfully auto-detected the icons path.
+     */
+    private static function autoDetectIconsPath(): bool
+    {
+        $candidates = [
+            __DIR__.'/../../../../node_modules/@mdi/svg/svg/', // icons installed as npm module
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_dir($candidate)) {
+                self::$iconsPath = $candidate;
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

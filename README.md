@@ -7,7 +7,15 @@ Painlessly drive away from using the MaterialDesignIcons webfont!
 [![Coverage Status](https://coveralls.io/repos/github/chteuchteu/MaterialDesignIcons-PHP/badge.svg)](https://coveralls.io/github/chteuchteu/MaterialDesignIcons-PHP)
 [![License](https://poser.pugx.org/mesavolt/mdi-php/license)](https://packagist.org/packages/mesavolt/mdi-php)
 
-## Usage
+## Installation
+
+Add this package to your project:
+
+```bash
+composer require mesavolt/mdi-php
+```
+
+### Using `@mdi/svg` npm package
 
 Add `@mdi/svg` npm package to your project:
 
@@ -18,18 +26,19 @@ yarn add @mdi/svg
 npm install @mdi/svg
 ```
 
-Add this package to your project:
+Icons location will be automatically detected.
 
-```bash
-composer require mesavolt/mdi-php
-```
+### Other
 
-Globally configure the icons location. This should be done once and before
+If you didn't install the icons pack using one of the documentation methods
+above, you can globally configure the icons location. This should be done once and before
 the first usage of the `Mdi::mdi` function.
 
 ```php
 Mdi::withIconsPath(__DIR__.'/../../../node_modules/@mdi/svg/svg/');
 ```
+
+## Usage
 
 Use it in your views:
 
