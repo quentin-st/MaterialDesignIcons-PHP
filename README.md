@@ -81,7 +81,9 @@ Mdi::withDefaultAttributes([
 Simply register `Mdi::mdi` as a Twig simple function and get started!
 
 ```php
-$twigEnv->addFunction(new \Twig_SimpleFunction('mdi', [Mdi::class, 'mdi'], ['is_safe' => ['html']]));
+use Twig\TwigFunction;
+
+$twigEnv->addFunction(new TwigFunction('mdi', [Mdi::class, 'mdi'], ['is_safe' => ['html']]));
 ```
 
 ```twig
