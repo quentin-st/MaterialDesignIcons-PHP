@@ -1,6 +1,6 @@
 {
     "name": "mesavolt/mdi-php",
-    "description": "Easy MDI integration for PHP 7.1+",
+    "description": "Easy MDI integration for PHP",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -27,10 +27,10 @@
         "sort-packages": true
     },
     "require": {
-        "php": ">=7.1"
+        "php": ">=8.1"
     },
     "require-dev": {
         "php-coveralls/php-coveralls": "^2.0",
-        "phpunit/phpunit": "^7"
+        "phpunit/phpunit": "^10"
     }
 }
