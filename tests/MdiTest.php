@@ -2,8 +2,12 @@
 
 namespace Mdi\Tests;
 
+use InvalidArgumentException;
 use Mdi\Mdi;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use SplFileInfo;
+use stdClass;
 
 class MdiTest extends TestCase
 {
@@ -11,14 +15,14 @@ class MdiTest extends TestCase
 
     public function test_withIconsPath_exception(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/^Specified icons path \(.+\/fa\/\) does not exist!$/');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/^Specified icons path \(.+\/fa\/\) does not exist!$/');
         Mdi::withIconsPath(__DIR__.'/fa');
     }
 
     public function test_mdi_withoutIconsPath(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('You forgot to specify MDI\'s path!');
         Mdi::mdi('duck');
     }
@@ -26,22 +30,23 @@ class MdiTest extends TestCase
     public function test_mdi_missingIcon(): void
     {
         Mdi::withIconsPath(__DIR__.'/Resources/icons');
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/^Unrecognized icon "dog" \(svg file ".+" does not exist\)\.$/');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/^Unrecognized icon "dog" \(svg file ".+" does not exist\)\.$/');
         Mdi::mdi('dog');
     }
 
     public function test_mdi_brokenIcon(): void
     {
         Mdi::withIconsPath(__DIR__.'/Resources/icons');
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/".+" could not be recognized as an icon file/');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/".+" could not be recognized as an icon file/');
         Mdi::mdi('broken-duck');
     }
 
     public function test_mdi_success(): void
     {
-        Mdi::withIconsPath(__DIR__.'/Resources/icons');
+        Mdi::withIconsPath($iconsPath = __DIR__.'/Resources/icons');
+        self::assertSame("$iconsPath/", Mdi::getIconsPath());
 
         $standardOutput = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" role="presentation"><path d="'.self::DUCK_PATH.'" /></svg>';
         $this->assertSame(
@@ -87,14 +92,27 @@ class MdiTest extends TestCase
         );
     }
 
+    public function test_defaultAttributes_validationFailed(): void
+    {
+        Mdi::withIconsPath(__DIR__.'/Resources/icons');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Attribute aria-label value must be a string');
+
+        Mdi::withDefaultAttributes([
+            'aria-label' => new stdClass(),
+        ]);
+    }
+
     public function test_defaultAttributes_success(): void
     {
         Mdi::withIconsPath(__DIR__.'/Resources/icons');
 
         // New attribute
-        Mdi::withDefaultAttributes([
+        Mdi::withDefaultAttributes($attrs = [
             'aria-label' => 'Duck'
         ]);
+        self::assertSame($attrs, Mdi::getDefaultAttributes());
         $this->assertSame(
             '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" role="presentation" aria-label="Duck"><path d="'.self::DUCK_PATH.'" /></svg>',
             Mdi::mdi('duck')
@@ -111,6 +129,21 @@ class MdiTest extends TestCase
         ]);
         $this->assertSame(
             '<svg width="24" height="24"><path d="'.self::DUCK_PATH.'" /></svg>',
+            Mdi::mdi('duck')
+        );
+
+        // Stringable attribute
+        $duckDotSvgFilePath = __DIR__.'/Resources/icons/duck.svg';
+        Mdi::withDefaultAttributes([
+            'viewBox' => null,
+            'xmlns' => null,
+            'role' => null,
+            'width' => null,
+            'height' => null,
+            'data-spl-file-info' => new SplFileInfo($duckDotSvgFilePath),
+        ]);
+        $this->assertSame(
+            '<svg data-spl-file-info="'.$duckDotSvgFilePath.'"><path d="'.self::DUCK_PATH.'" /></svg>',
             Mdi::mdi('duck')
         );
     }

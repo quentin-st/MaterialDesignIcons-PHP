@@ -2,27 +2,37 @@
 
 namespace Mdi;
 
+use InvalidArgumentException;
+use RuntimeException;
+use Stringable;
+
 abstract class Mdi
 {
-    /** @var string */
-    private static $iconsPath;
-
-    /** @var array */
-    public static $defaultAttributes = [];
+    private static ?string $iconsPath = null;
+    /** @var array<string, string> */
+    public static array $defaultAttributes = [];
 
     /**
      * Specify the icons path. Will usually look like Mdi::withIconsPath(__DIR__.'/../../../node_modules/@mdi/svg/svg/');
      */
     public static function withIconsPath(string $path): void
     {
-        $path = rtrim($path, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        // Ensure path ends with "/"
+        if (!str_ends_with($path, DIRECTORY_SEPARATOR)) {
+            $path .= DIRECTORY_SEPARATOR;
+        }
 
         // Ensure the specified path exists
         if (!is_dir($path)) {
-            throw new \InvalidArgumentException(sprintf('Specified icons path (%s) does not exist!', $path));
+            throw new InvalidArgumentException(sprintf('Specified icons path (%s) does not exist!', $path));
         }
 
         self::$iconsPath = $path;
+    }
+
+    public static function getIconsPath(): ?string
+    {
+        return self::$iconsPath;
     }
 
     /**
@@ -30,29 +40,38 @@ abstract class Mdi
      */
     public static function withDefaultAttributes(array $attributes): void
     {
+        self::validateAttributes($attributes);
         self::$defaultAttributes = $attributes;
+    }
+
+    public static function getDefaultAttributes(): array
+    {
+        return self::$defaultAttributes;
     }
 
     public static function mdi(string $icon, ?string $class = null, int $size = 24, array $attrs = []): string
     {
         // Ensure that the icons path has been specified, or auto-detect it
         if (!self::$iconsPath && !self::autoDetectIconsPath()) {
-            throw new \RuntimeException('You forgot to specify MDI\'s path!');
+            throw new RuntimeException('You forgot to specify MDI\'s path!');
         }
 
+        // Encore attrs are OK
+        self::validateAttributes($attrs);
+
         // Strip leading "mdi mdi-" or "mdi-"
-        if (strpos($icon, 'mdi mdi-') === 0) {
-            $icon = substr($icon, \strlen('mdi mdi-'));
+        if (str_starts_with($icon, 'mdi mdi-')) {
+            $icon = substr($icon, strlen('mdi mdi-'));
         }
-        if (strpos($icon, 'mdi-') === 0) {
-            $icon = substr($icon, \strlen('mdi-'));
+        if (str_starts_with($icon, 'mdi-')) {
+            $icon = substr($icon, strlen('mdi-'));
         }
 
         // Find the icon, ensure it exists
         $filePath = self::$iconsPath.$icon.'.svg';
 
         if (!is_file($filePath)) {
-            throw new \InvalidArgumentException(sprintf('Unrecognized icon "%s" (svg file "%s" does not exist).', $icon, $filePath));
+            throw new InvalidArgumentException(sprintf('Unrecognized icon "%s" (svg file "%s" does not exist).', $icon, $filePath));
         }
 
         // Read the file
@@ -60,7 +79,7 @@ abstract class Mdi
 
         // Only keep the <path d="..." /> part
         if (preg_match('/(<path d=".+" \/>)/', $svg, $matches) !== 1) {
-            throw new \InvalidArgumentException(sprintf('"%s" could not be recognized as an icon file', $filePath));
+            throw new InvalidArgumentException(sprintf('"%s" could not be recognized as an icon file', $filePath));
         }
         $svg = $matches[1];
 
@@ -69,8 +88,8 @@ abstract class Mdi
             [
                 'viewBox' => '0 0 24 24',
                 'xmlns' => 'http://www.w3.org/2000/svg',
-                'width' => $size,
-                'height' => $size,
+                'width' => (string) $size,
+                'height' => (string) $size,
                 'role' => 'presentation',
             ],
             self::$defaultAttributes,
@@ -91,6 +110,22 @@ abstract class Mdi
         );
     }
 
+    private static function validateAttributes(array $attributes): void
+    {
+        foreach ($attributes as $name => $value) {
+            if (!self::isStringable($value)) {
+                throw new InvalidArgumentException("Attribute $name value must be a string, scalar or Stringable");
+            }
+        }
+    }
+
+    private static function isStringable(mixed $value): bool
+    {
+        return $value === null
+            || is_scalar($value)
+            || $value instanceof Stringable;
+    }
+
     /**
      * Attempts to auto-detect $iconsPath.
      * We assume that this file (Mdi.php) lives in /vendor/mesavolt/mdi-php/src/.
@@ -99,16 +134,10 @@ abstract class Mdi
      */
     private static function autoDetectIconsPath(): bool
     {
-        $candidates = [
-            __DIR__.'/../../../../node_modules/@mdi/svg/svg/', // icons installed as npm module
-        ];
-
-        foreach ($candidates as $candidate) {
-            if (is_dir($candidate)) {
-                self::$iconsPath = $candidate;
-
-                return true;
-            }
+        // Detect icons installed as npm module
+        if (is_dir($npmModule = __DIR__.'/../../../../node_modules/@mdi/svg/svg/')) {
+            self::$iconsPath = $npmModule;
+            return true;
         }
 
         return false;
@@ -120,7 +149,7 @@ abstract class Mdi
     private static function attributes(array $attrs): string
     {
         return implode(' ', array_map(
-            function ($val, $key) {
+            function (string $val, string $key) {
                 return $key.'="'.htmlspecialchars($val).'"';
             },
             $attrs,

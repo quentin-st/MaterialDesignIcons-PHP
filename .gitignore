@@ -2,3 +2,4 @@
 /vendor
 coverage.xml
 coverage
+.phpunit.result.cache

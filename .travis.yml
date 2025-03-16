@@ -1,6 +1,6 @@
 language: php
 php:
-  - '7.1'
+  - '8.4'
 
 install: composer install
 script: vendor/bin/phpunit --coverage-clover coverage.xml
