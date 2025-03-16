@@ -30,8 +30,13 @@ abstract class Mdi
         self::$iconsPath = $path;
     }
 
-    public static function getIconsPath(): ?string
+    public static function getIconsPath(): string
     {
+        // Ensure that the icons path has been specified, or auto-detect it
+        if (!self::$iconsPath && !self::autoDetectIconsPath()) {
+            throw new RuntimeException('You forgot to specify MDI\'s path!');
+        }
+
         return self::$iconsPath;
     }
 
@@ -52,11 +57,9 @@ abstract class Mdi
     public static function mdi(string $icon, ?string $class = null, int $size = 24, array $attrs = []): string
     {
         // Ensure that the icons path has been specified, or auto-detect it
-        if (!self::$iconsPath && !self::autoDetectIconsPath()) {
-            throw new RuntimeException('You forgot to specify MDI\'s path!');
-        }
+        self::getIconsPath();
 
-        // Encore attrs are OK
+        // Ensure attrs are OK
         self::validateAttributes($attrs);
 
         // Strip leading "mdi mdi-" or "mdi-"
